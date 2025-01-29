@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Capture and Save Image to Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #000000; /* Background color set to black */
+            color: white; /* Text color set to white */
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        video {
+            border: 5px solid #333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #snap, #liveStream {
+            padding: 15px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+        #snap {
+            background-color: #008CBA; /* Default button color */
+            color: white;
+        }
+        #snap:hover {
+            background-color: #005f73;
+        }
+        #liveStream {
+            background-color: #4CAF50; /* New button color */
+            color: white;
+            display: none; /* Initially hidden */
+        }
+        #liveStream:hover {
+            background-color: #3e8e41;
+        }
+        #canvas, #captured-image {
+            display: none;
+        }
+        #captured-image {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>CrowdCount Live Capture page</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <button id="snap">Capture Crowd</button>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <img id="captured-image" width="640" height="480"/>
+    <button id="liveStream">Count Crowd</button>
+
+    <script>
+        // Access webcam
+        var video = document.getElementById('video');
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+                video.srcObject = stream;
+                video.play();
+            });
+        }
+        
+        // Capture photo and display it
+        document.getElementById('snap').addEventListener('click', function() {
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, 640, 480);
+
+            var dataURL = canvas.toDataURL('image/png');
+            var capturedImage = document.getElementById('captured-image');
+            capturedImage.src = dataURL;
+            capturedImage.style.display = 'block';
+
+            // Send image to server
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', "{{ url_for('upload_snap') }}", true);
+            xhr.setRequestHeader('Content-Type', 'application/upload');
+            xhr.send(dataURL);
+
+            // Show the "Go to Live Stream" button
+            var liveStreamButton = document.getElementById('liveStream');
+            liveStreamButton.style.display = 'block';
+        });
+
+        // Go to live stream
+        document.getElementById('liveStream').addEventListener('click', function() {
+            window.location.href = "{{ url_for('live_stream') }}";
+        });
+    </script>
+</body>
+</html>
