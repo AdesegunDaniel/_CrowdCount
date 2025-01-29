@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crowdcount Project</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(to right, #000000, #434343); /* Gradient background */
+            color: white; /* Change text color to white */
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input[type="file"],
+        .form-group input[type="radio"],
+        .form-group select {
+            width: auto;
+        }
+        .form-group input[type="radio"] {
+            width: auto;
+        }
+        .form-group button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-group button:disabled {
+            background-color: #CCCCCC;
+            cursor: not-allowed;
+        }
+        .info {
+            color: blue;
+            font-size: 0.9em;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+        .progress {
+        width: 25%;
+        background-color: #f3f3f3;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 10px;
+        }
+
+        .progress-bar {
+        height: 10px;
+        background-color: #007BFF;
+        width: 0%;
+        transition: width 0.4s ease;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 10px; /* Increase the font size */
+            color: white; /* Set footer text to white */
+            text-align: center; /* Center the footer text */
+            width: 100%; /* Ensure footer spans the full width */
+            position: absolute; /* Position the footer at the bottom */
+            bottom: -50px; /* Adjust the bottom position */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Crowdcount Project</h1>
+        <p>The CrowdCount model is a sophisticated tool designed to analyze and estimate the number of people in a given area using images or video footage. This model leverages advanced computer vision techniques and machine learning algorithms to accurately count individuals in crowded environments.</p>
+        <p>CrowdCount find its use in areas like Event Management, Urban Planning, Retail AnalyticsPublic Safety and so on </p>
+        <p>To test the model please provide the informations below</p>
+        <form id="crowdcountForm" action="{{ url_for('process_picture') }}" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="inputType">How would you like to provide your input?</label>
+                <input type="radio" name="inputType" value="picture" id="inputPicture"> Upload a Picture<br>
+                <input type="radio" name="inputType" value="live" id="inputLive"> Scan Crowd with Camera
+            </div>
+            <div class="form-group" id="fileUploadGroup" style="display: none;">
+                <label for="fileUpload">Upload your file:</label>
+                <input type="file" name="file" id="fileUpload">
+                <input type="hidden" name="filePath" id="filePath"> <!-- Hidden input for file path -->
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" style="width: 0%;"></div> 
+                </div>
+                <p class="info">Note: file should not be more than 100MB.</p>
+                <p class="error" id="fileError" style="display: none;">A file needs to be uploaded first.</p>
+            </div>
+            <div class="form-group">
+                <label for="densityLevel">Select the density level of the crowd:</label>
+                <select name="densityLevel" id="densityLevel">
+                    <option value="">Select...</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ethnicity">Select the predominant ethnicity of the crowd:</label>
+                <select name="ethnicity" id="ethnicity">
+                    <option value="">Select...</option>
+                    <option value="white">White</option>
+                    <option value="black">Black</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="nextButton" disabled>Start Counting</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const form = document.getElementById('crowdcountForm');
+        const nextButton = document.getElementById('nextButton');
+        const fileUploadGroup = document.getElementById('fileUploadGroup');
+        const inputPicture = document.getElementById('inputPicture');
+        const inputLive = document.getElementById('inputLive');
+        const fileUpload = document.getElementById('fileUpload');
+        const fileError = document.getElementById('fileError');
+    
+        form.addEventListener('change', () => {
+            const inputType = form.querySelector('input[name="inputType"]:checked');
+            const densityLevel = form.querySelector('#densityLevel').value;
+            const ethnicity = form.querySelector('#ethnicity').value;
+    
+            if (inputType && densityLevel && ethnicity) {
+                nextButton.disabled = false;
+            } else {
+                nextButton.disabled = true;
+            }
+    
+            if (inputPicture.checked) {
+                fileUploadGroup.style.display = 'block';
+            } else if (inputLive.checked) {
+                fileUploadGroup.style.display = 'none';
+            } else {
+                fileUploadGroup.style.display = 'none';
+            }
+        });
+    
+        fileUpload.addEventListener('change', () => {
+            const file = fileUpload.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+    
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', "{{ url_for('upload_file') }}", true);
+    
+                xhr.upload.addEventListener('progress', (event) => {
+                    if (event.lengthComputable) {
+                        const percentComplete = (event.loaded / event.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                    }
+                });
+    
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        console.log('File uploaded successfully:', data);
+                        filePathInput.value = data.file_path; // Set the hidden input value with the file path
+                    } else {
+                        console.error('Error uploading file:', xhr.statusText);
+                    }
+                };
+    
+                xhr.onerror = () => {
+                    console.error('Error uploading file:', xhr.statusText);
+                };
+    
+                xhr.send(formData);
+            }
+        });
+    
+        nextButton.addEventListener('click', (event) => {
+            const inputType = form.querySelector('input[name="inputType"]:checked').value;
+            const densityLevel = form.querySelector('#densityLevel').value;
+            const ethnicity = form.querySelector('#ethnicity').value;
+    
+            // Check if file is uploaded for picture
+            if (inputPicture.checked && !fileUpload.files.length) {
+                fileError.style.display = 'block';
+                event.preventDefault();
+                return;
+            } else {
+                fileError.style.display = 'none';
+            }
+    
+            // Allow the form to submit normally
+        });
+    </script>
+<footer>
+    Model built by Adesegun Oluwademilade Daniel
+</footer>    
+</body>
+</html>
