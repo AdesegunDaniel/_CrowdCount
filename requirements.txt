@@ -1,0 +1,10 @@
+opencv-python
+tensorflow
+numpy
+Pillow
+scikit-image
+ultralytics
+keras
+flask
+filetype
+flask_socketio
