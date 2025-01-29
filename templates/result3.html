@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processed Image Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black; /* Set background to black */
+            color: white; /* Set text to white */
+            flex-direction: column; /* Stack the footer below the container */
+        }
+        .container {
+            display: flex;
+            align-items: flex-start;
+            border: 1px solid #ccc;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* White wave-like shadow */
+            transform: scale(2);
+        }
+        .stats-container {
+            margin-right: 40px;
+            max-width: 600px;
+        }
+        .stats-container h2 {
+            margin-top: 0;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 18px; /* Increase the font size */
+            color: white; /* Set footer text to white */
+            text-align: center; /* Center the footer text */
+            width: 100%; /* Ensure footer spans the full width */
+            position: absolute; /* Position the footer at the bottom */
+            bottom: 10px; /* Adjust the bottom position */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="stats-container">
+            <h2>Image Statistics</h2>
+            <p><strong>Crowd Estimation:</strong> {{ num_peaks }}</p>
+            <p><strong>Crowd Density:</strong> {{ distance }}</p>
+            <p><strong>Ethnicity:</strong> {{ threshold }}</p>
+        </div>
+        <div class="image-container">
+            <img src="{{ url_for('static', filename='processed_image.jpg') }}" alt="Processed Image" id="processedImage">
+        </div>
+    </div>
+    <footer>
+        Model built by Adesegun Oluwademilade Daniel
+    </footer>
+</body>
+</html>
