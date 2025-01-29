@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdCount Notice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .notice {
+            background-color: #ffebcd;
+            border: 2px solid #ffa07a;
+            padding: 20px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 600px;
+        }
+        .notice h2 {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .notice p {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .continue-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        .continue-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="notice">
+        <h2>Important Notice</h2>
+        <p>The "CrowdCount" model is designed to detect crowds in images using density maps. It may interpret the background of images containing one, two, or a few individuals as a crowd. Consequently, if an image with only a few people is analyzed, the model's behavior may appear inaccurate. This is due to the training data, which primarily consists of images with dense crowds. Thank you for your understanding.</p>
+        <p>This is an important notice for the users of the CrowdCount model. Please ensure that you understand the limitations and intended use of the model before proceeding.</p>
+        <form action="{{ url_for('cc_home') }}" method="get">
+            <button class="continue-button" type="submit">Continue</button>
+        </form>
+    </div>
+</body>
+</html>
