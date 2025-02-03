@@ -1,5 +1,8 @@
 # CrowdCount
 
+![alt text](Dataset/crowd.png) 
+
+
 CrowdCount is a sophisticated convolutional neural network (CNN) designed to estimatively count people within crowded environments. Leveraging advanced deep learning techniques, this model excels in real-time crowd analysis, ensuring high precision and reliability in various applications such as event management, security, and urban planning.
 
 ## Features
